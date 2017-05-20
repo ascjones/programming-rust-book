@@ -24,10 +24,30 @@ fn escapes(c: Complex<f64>, limit: u32) -> Option<u32> {
     return None;
 }
 
-#[allow(dead_code)]
-fn complex_square_add_loop(c: Complex<f64>) {
-    let mut z = Complex { re: 0.0, im: 0.0 };
-    loop {
-        z = z * z + c;
-    }
+/// Return the point on the complex plane corresponding to a given pixel in the
+/// bitmap.
+///
+/// `bounds` is a pair giving the width and height of the bitmap. `pixel` is a
+/// pair indicating a particular pixel in that bitmap. The `upper_left` and
+/// `lower_right` parameters are points on the complex plane designating the
+/// area our bitmap covers.
+fn pixel_to_point(bounds: (usize, usize), 
+                  pixel: (usize, usize),
+                  upper_left: (f64, f64),
+                  lower_right: (f64, f64))
+    -> (f64, f64) 
+{    
+    // It might be nicer to find the position of the *middle* of the pixel,
+    // instead of its upper left corner, but this is easier to write tests for.
+    let (width, height) = (lower_right.0 - upper_left.0,
+                           upper_left.1 - lower_right.1);
+    (upper_left.0 + pixel.0 as f64 * width / bounds.0 as f64,
+     upper_left.1 - pixel.1 as f64 * height / bounds.1 as f64)
+}
+
+#[test]
+fn test_pixel_to_point() {
+    assert_eq!(pixel_to_point((100,100), (25, 75), 
+                              (-1.0, 1.0), (1.0, -1.0)), 
+        (-0.5, -0.5));
 }
